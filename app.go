@@ -16,7 +16,7 @@ type App struct {
 }
 
 type shortenReq struct {
-	URL                 string `json:"usr" validate:"nonzero"`
+	URL                 string `json:"url" validate:"nonzero"`
 	ExpirationInMinutes int64  `json:"expiration_in_minutes" validate:"min=0"`
 }
 
@@ -45,10 +45,12 @@ func (a *App) createShortlink(w http.ResponseWriter, r *http.Request) {
 	var req shortenReq
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondWithErr(w, StatusError{http.StatusBadRequest, fmt.Errorf("json格式错误 %v", r.Body)})
 		return
 	}
 
 	if err := validator.Validate(req); err != nil {
+		respondWithErr(w, StatusError{http.StatusBadRequest, fmt.Errorf("参数校验错误 %v", req)})
 		return
 	}
 
